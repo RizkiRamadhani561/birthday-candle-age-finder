@@ -1,0 +1,571 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🕯️ Birthday Candle Finder</title>
+<meta name="description" content="Calculate birthday candles needed — taper counts, numeral candles & festive messages.">
+<style>
+:root{
+  --warm1:#FF9D3E;--warm2:#FFB84D;--amber:#FFC850;
+  --flame1:#FF6B35;--flame2:#FFD700;
+  --bg1:#FFF5E6;--bg2:#FFE8CC;
+  --glass:rgba(255,255,255,0.15);--glass-b:rgba(255,255,255,0.3);
+  --text:#3D2B1F;--text2:#7A5C45;--text-inv:#FFF8F0;
+  --card-shadow:0 8px 32px rgba(255,159,62,.18);
+  --blur:20px;--r:20px;
+  --accent:#FF7A00;
+  transition:background .4s,color .4s;
+}
+[data-dark]{
+  --bg1:#1a1208;--bg2:#2d1f0f;
+  --glass:rgba(20,12,0,0.45);--glass-b:rgba(255,200,80,0.18);
+  --text:#FFE8CC;--text2:#C4945A;--text-inv:#1a1208;
+  --card-shadow:0 8px 32px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 100%);
+  color:var(--text);position:relative;overflow-x:hidden;
+}
+.orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.45;animation:drift 12s ease-in-out infinite alternate}
+.orb1{width:350px;height:350px;background:radial-gradient(circle,#FFB84D,transparent);top:-80px;left:-100px;animation-delay:0s}
+.orb2{width:280px;height:280px;background:radial-gradient(circle,#FF9D3E,transparent);bottom:-60px;right:-80px;animation-delay:-4s}
+.orb3{width:200px;height:200px;background:radial-gradient(circle,#FFC850,transparent);top:40%;left:50%;animation-delay:-8s}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(30px,20px) scale(1.12)}}
+.app{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:24px 16px 60px}
+header{text-align:center;margin-bottom:32px}
+.logo{font-size:2.6rem;margin-bottom:6px;display:inline-block;animation:bob 3s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+h1{font-size:clamp(1.6rem,5vw,2.2rem);font-weight:800;
+   background:linear-gradient(135deg,var(--warm1),var(--flame1));
+   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+   margin-bottom:6px}
+.tagline{color:var(--text2);font-size:.95rem}
+.top-controls{display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px}
+.icon-btn{
+  width:40px;height:40px;border-radius:50%;border:1px solid var(--glass-b);
+  background:var(--glass);backdrop-filter:blur(var(--blur));-webkit-backdrop-filter:blur(var(--blur));
+  cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;
+  transition:transform .2s,background .2s;color:var(--text);
+}
+.icon-btn:hover{transform:scale(1.1);background:rgba(255,159,62,.2)}
+.glass{
+  background:var(--glass);backdrop-filter:blur(var(--blur));-webkit-backdrop-filter:blur(var(--blur));
+  border:1px solid var(--glass-b);border-radius:var(--r);
+  box-shadow:var(--card-shadow),inset 0 1px 0 rgba(255,255,255,.5);
+  position:relative;overflow:hidden;
+}
+.glass::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);
+}
+.input-card{padding:28px 24px;margin-bottom:20px}
+.input-card h2{font-size:1rem;font-weight:700;color:var(--text2);margin-bottom:16px;letter-spacing:.05em;text-transform:uppercase}
+.toggle-row{display:flex;gap:8px;margin-bottom:16px;background:rgba(255,255,255,.1);
+  border-radius:12px;padding:4px}
+.mode-btn{flex:1;padding:8px;border:none;background:transparent;border-radius:9px;
+  cursor:pointer;font-size:.85rem;font-weight:600;color:var(--text2);transition:all .25s}
+.mode-btn.active{background:linear-gradient(135deg,var(--warm1),var(--flame1));color:#fff;
+  box-shadow:0 4px 12px rgba(255,122,0,.35)}
+.input-group{display:flex;gap:10px;align-items:stretch}
+.main-input{
+  flex:1;padding:14px 18px;border-radius:14px;border:1.5px solid var(--glass-b);
+  background:rgba(255,255,255,.2);backdrop-filter:blur(10px);
+  font-size:1.1rem;font-weight:600;color:var(--text);outline:none;
+  transition:border-color .2s,box-shadow .2s;min-height:52px;
+}
+.main-input::placeholder{color:var(--text2);font-weight:400}
+.main-input:focus{border-color:var(--warm1);box-shadow:0 0 0 3px rgba(255,157,62,.25)}
+.calc-btn{
+  padding:14px 22px;border-radius:14px;border:none;min-height:52px;
+  background:linear-gradient(135deg,var(--warm1),var(--flame1));color:#fff;
+  font-size:1rem;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 16px rgba(255,122,0,.4);
+  transition:transform .15s,box-shadow .15s;white-space:nowrap;
+}
+.calc-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(255,122,0,.5)}
+.calc-btn:active{transform:translateY(0)}
+.hint{font-size:.78rem;color:var(--text2);margin-top:10px}
+.error-msg{color:#e05a00;font-size:.85rem;margin-top:8px;min-height:1.2em;font-weight:500}
+#results{transition:opacity .35s,transform .35s;opacity:0;transform:translateY(16px);pointer-events:none}
+#results.show{opacity:1;transform:translateY(0);pointer-events:all}
+.age-hero{text-align:center;padding:28px 20px;margin-bottom:20px}
+.age-num{
+  font-size:clamp(4rem,18vw,7rem);font-weight:900;line-height:1;
+  background:linear-gradient(135deg,var(--flame1),var(--amber),var(--warm2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  display:block;animation:popIn .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
+.age-label{font-size:1rem;color:var(--text2);margin-top:4px}
+.bday-msg{
+  margin-top:14px;font-size:1rem;font-weight:600;color:var(--text);
+  padding:10px 20px;border-radius:50px;background:rgba(255,200,80,.2);
+  display:inline-block;animation:fadeSlide .5s .2s both;
+}
+@keyframes fadeSlide{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+
+.breakdown{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:480px){.breakdown{grid-template-columns:1fr}}
+.b-card{padding:22px 20px}
+.b-card h3{font-size:.8rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.b-value{font-size:2.2rem;font-weight:800;color:var(--accent)}
+.b-sub{font-size:.82rem;color:var(--text2);margin-top:4px}
+.numeral-wrap{padding:22px 20px;margin-bottom:20px}
+.numeral-wrap h3{font-size:.8rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+.numeral-digits{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:14px}
+.digit-badge{
+  width:52px;height:68px;border-radius:14px;
+  background:linear-gradient(135deg,var(--warm1),var(--flame1));
+  color:#fff;font-size:1.8rem;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 14px rgba(255,122,0,.4);
+  animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both;
+  cursor:default;position:relative;
+}
+.digit-badge::after{
+  content:'#';position:absolute;top:4px;right:6px;font-size:.55rem;opacity:.7
+}
+.plus-sign{font-size:1.4rem;font-weight:700;color:var(--text2);align-self:center}
+.numeral-desc{font-size:.85rem;color:var(--text2)}
+.candle-viz-wrap{padding:22px 20px;margin-bottom:20px}
+.candle-viz-wrap h3{font-size:.8rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.candle-count-label{font-size:.85rem;color:var(--text2);margin-bottom:14px}
+.candles-grid{display:flex;flex-wrap:wrap;gap:6px;max-height:220px;overflow-y:auto;padding:4px}
+.candles-grid::-webkit-scrollbar{width:4px}
+.candles-grid::-webkit-scrollbar-thumb{background:var(--warm1);border-radius:4px}
+.candle-item{
+  display:flex;flex-direction:column;align-items:center;cursor:pointer;
+  animation:popIn .3s cubic-bezier(.34,1.56,.64,1) both;
+}
+.candle-flame{
+  width:8px;height:14px;background:linear-gradient(to bottom,#fff7a0,var(--flame2),var(--flame1));
+  border-radius:50% 50% 20% 20%;
+  box-shadow:0 0 8px 3px rgba(255,180,0,.6);
+  animation:flicker 1.2s ease-in-out infinite alternate;
+  transform-origin:bottom center;
+}
+@keyframes flicker{
+  0%{transform:scaleX(1) scaleY(1) rotate(-1deg);opacity:1}
+  30%{transform:scaleX(.85) scaleY(1.05) rotate(1.5deg);opacity:.9}
+  60%{transform:scaleX(1.05) scaleY(.95) rotate(-1deg);opacity:1}
+  100%{transform:scaleX(.9) scaleY(1.08) rotate(2deg);opacity:.85}
+}
+.candle-item.lit .candle-flame{
+  animation:flickerBig 0.8s ease-in-out infinite alternate;
+  box-shadow:0 0 14px 6px rgba(255,200,0,.8);
+}
+@keyframes flickerBig{
+  0%{transform:scaleX(1.1) scaleY(1.15) rotate(-2deg)}
+  100%{transform:scaleX(.85) scaleY(1.25) rotate(3deg)}
+}
+.candle-body{
+  width:10px;height:28px;
+  background:linear-gradient(to bottom,#fff5d6,#ffe0a0,#ffc84d);
+  border-radius:3px 3px 2px 2px;
+  box-shadow:inset -2px 0 4px rgba(0,0,0,.1);
+  margin-top:1px;
+}
+.candle-base{width:12px;height:3px;background:rgba(0,0,0,.12);border-radius:50%}
+.overflow-note{font-size:.78rem;color:var(--text2);margin-top:8px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px}
+.action-btn{
+  flex:1;min-width:140px;padding:13px 18px;border-radius:14px;border:1.5px solid var(--glass-b);
+  background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  color:var(--text);font-size:.88rem;font-weight:600;cursor:pointer;
+  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.action-btn:hover{background:rgba(255,159,62,.2);border-color:var(--warm1);transform:translateY(-2px)}
+.action-btn.copied{background:rgba(80,200,100,.2);border-color:#50c864;color:#2a7a3a}
+.milestone{
+  padding:14px 22px;margin-bottom:20px;text-align:center;
+  background:linear-gradient(135deg,rgba(255,200,80,.25),rgba(255,122,0,.2));
+  border:1px solid rgba(255,200,80,.5);border-radius:16px;
+  font-size:.95rem;font-weight:600;color:var(--text);
+  animation:fadeSlide .5s .3s both;
+}
+.particle-wrap{position:fixed;inset:0;pointer-events:none;z-index:99;overflow:hidden}
+.particle{
+  position:absolute;width:8px;height:8px;border-radius:50%;
+  animation:fall linear forwards;opacity:0;
+}
+@keyframes fall{
+  0%{opacity:1;transform:translateY(-10px) rotate(0deg)}
+  100%{opacity:0;transform:translateY(100vh) rotate(720deg)}
+}
+footer{text-align:center;margin-top:40px;color:var(--text2);font-size:.78rem}
+footer a{color:var(--warm1)}
+:focus-visible{outline:2.5px solid var(--warm1);outline-offset:3px}
+
+</style>
+</head>
+<body>
+<div class="orbs" aria-hidden="true">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+<div class="particle-wrap" id="particles" aria-hidden="true"></div>
+
+<div class="app">
+  <div class="top-controls">
+    <button class="icon-btn" id="darkBtn" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
+  </div>
+
+  <header>
+    <div class="logo" aria-hidden="true">🕯️</div>
+    <h1>Birthday Candle Finder</h1>
+    <p class="tagline">Plan the perfect cake — taper counts, numeral candles & more</p>
+  </header>
+
+  <!-- INPUT CARD -->
+  <div class="glass input-card" role="region" aria-label="Age input">
+    <h2>Calculate Candles</h2>
+    <div class="toggle-row" role="group" aria-label="Input mode">
+      <button class="mode-btn active" id="modeYear" aria-pressed="true">Birth Year</button>
+      <button class="mode-btn" id="modeAge" aria-pressed="false">Direct Age</button>
+    </div>
+    <div class="input-group">
+      <input
+        class="main-input" id="mainInput" type="number"
+        placeholder="e.g. 1999" min="1900" max="2026"
+        aria-label="Enter birth year" autocomplete="off"
+      >
+      <button class="calc-btn" id="calcBtn" aria-label="Calculate candles">🔥 Calculate</button>
+    </div>
+    <p class="hint" id="inputHint">Enter birth year (e.g. 1999) or short year (e.g. 99)</p>
+    <p class="error-msg" id="errorMsg" role="alert" aria-live="polite"></p>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results" aria-live="polite" aria-label="Candle calculation results">
+
+    <!-- AGE HERO -->
+    <div class="glass age-hero">
+      <span class="age-num" id="ageNum">0</span>
+      <div class="age-label">years young 🎂</div>
+      <div class="bday-msg" id="bdayMsg"></div>
+    </div>
+
+    <!-- MILESTONE -->
+    <div class="milestone" id="milestone" style="display:none"></div>
+
+    <!-- BREAKDOWN GRID -->
+    <div class="breakdown">
+      <div class="glass b-card">
+        <h3>🕯️ Taper Candles</h3>
+        <div class="b-value" id="taperCount">0</div>
+        <div class="b-sub">individual small candles</div>
+      </div>
+      <div class="glass b-card">
+        <h3>🔢 Numeral Candles</h3>
+        <div class="b-value" id="numeralCount">0</div>
+        <div class="b-sub">digit candles needed</div>
+      </div>
+    </div>
+
+    <!-- NUMERAL BREAKDOWN -->
+    <div class="glass numeral-wrap">
+      <h3>Numeral Candle Breakdown</h3>
+      <div class="numeral-digits" id="numeralDigits" role="list" aria-label="Numeral candles"></div>
+      <p class="numeral-desc" id="numeralDesc"></p>
+    </div>
+
+    <!-- CANDLE VIZ -->
+    <div class="glass candle-viz-wrap">
+      <h3>🕯️ Taper Candle Visualization</h3>
+      <p class="candle-count-label" id="vizLabel"></p>
+      <div class="candles-grid" id="candlesGrid" role="list" aria-label="Candle visualization"></div>
+      <p class="overflow-note" id="overflowNote"></p>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="actions">
+      <button class="action-btn" id="copyBtn" aria-label="Copy shopping list">📋 Copy Shopping List</button>
+      <button class="action-btn" id="shareBtn" aria-label="Share birthday info">🎉 Share Birthday</button>
+    </div>
+
+  </div><!-- /results -->
+
+  <footer>Made with ❤️ &amp; 🔥 for vibecoding · <a href="https://github.com/RizkiRamadhani561/birthday-candle-age-finder" style="color:var(--warm1)">GitHub</a></footer>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+let isYearMode = true;
+let currentAge = 0;
+
+const $=id=>document.getElementById(id);
+const mainInput=$('mainInput'), errorMsg=$('errorMsg'), inputHint=$('inputHint');
+const results=$('results'), ageNum=$('ageNum'), bdayMsg=$('bdayMsg');
+const taperCount=$('taperCount'), numeralCount=$('numeralCount');
+const numeralDigits=$('numeralDigits'), numeralDesc=$('numeralDesc');
+const candlesGrid=$('candlesGrid'), vizLabel=$('vizLabel'), overflowNote=$('overflowNote');
+const modeYear=$('modeYear'), modeAge=$('modeAge');
+const copyBtn=$('copyBtn'), shareBtn=$('shareBtn');
+const darkBtn=$('darkBtn'), milestone=$('milestone');
+
+const MESSAGES = [
+  ["heartfelt","Another trip around the sun — you've earned every candle! 🌞"],
+  ["humor","Age is just a number… but candles are getting expensive! 🤭"],
+  ["inspo","Every year is a new chapter — make this one legendary! ✨"],
+  ["grateful","Grateful for every year of awesome that is YOU! 🙏"],
+  ["humor","Blowing out {n} candles? Hope you've been practicing! 💨"],
+  ["inspo","The best is yet to come — light up the world! 🔥"],
+  ["heartfelt","Wishing you a birthday as bright as {n} flames! 🕯️"],
+  ["humor","Officially {n}: old enough to know better, young enough not to care! 😄"],
+  ["inspo","Every candle represents a year of growth. You're glowing! 💫"],
+  ["grateful","Thank you for existing — {n} years of pure joy! 🎉"],
+];
+
+const MILESTONES = {
+  1:"🍰 Baby's very first birthday — everything is magical!",
+  13:"🎸 Welcome to the teenage years!",
+  16:"🚗 Sweet sixteen — the world is opening up!",
+  18:"🗳️ Officially an adult! The world is yours.",
+  21:"🥂 Cheers to 21 — a true milestone!",
+  25:"🎯 Quarter century legend!",
+  30:"🌟 Thirty, flirty, and thriving!",
+  40:"💎 Life begins at 40!",
+  50:"👑 Fifty and fabulous — a true golden era!",
+  60:"🌺 Diamond years — wisdom in full bloom!",
+  70:"🏆 Seventy years of pure mastery!",
+  80:"🌈 Eighty wonderful years!",
+  90:"🦋 Ninety extraordinary years!",
+  100:"🎊 A CENTURY! You're absolutely legendary!",
+  111:"🍀 Triple ones — incredibly lucky!",
+};
+
+const LUCKY = {77:"🎰 Lucky 77!",88:"✌️ Double fortune — 88!",99:"🚀 Almost a century!",
+  111:"🌟 Triple magic!",123:"📈 Stairway to heaven!"};
+
+const currentYear = ()=> new Date().getFullYear();
+
+function parseInput(val, yearMode){
+  val = val.trim();
+  if(!val) return {err:"Please enter a value."};
+  const n = Number(val);
+  if(isNaN(n)||!Number.isInteger(n)||n<0) return {err:"Enter a valid number."};
+
+  if(yearMode){
+    let year = n;
+        if(n >= 0 && n <= 99){
+      year = n <= currentYear()-2000 ? 2000+n : 1900+n;
+    }
+    const age = currentYear()-year;
+    if(year < 1900 || year > currentYear()) return {err:`Birth year must be 1900–${currentYear()}.`};
+    if(age < 0) return {err:"Birth year can't be in the future!"};
+    return {age, year};
+  } else {
+    if(n < 1 || n > 150) return {err:"Age must be between 1 and 150."};
+    return {age:n};
+  }
+}
+
+function numeralBreakdown(age){
+  return String(age).split('').map(Number);
+}
+
+function getMessage(age){
+  const pool = MESSAGES.slice();
+  const idx = (age * 7 + Date.now()) % pool.length | 0;
+  return pool[idx][1].replace(/\{n\}/g, age);
+}
+
+const MAX_VIZ = 60; 
+function renderCandles(age){
+  candlesGrid.innerHTML='';
+  overflowNote.textContent='';
+  const count = Math.min(age, MAX_VIZ);
+  vizLabel.textContent = `Showing ${count} of ${age} taper candle${age!==1?'s':''}`;
+  if(age > MAX_VIZ) overflowNote.textContent=`(+ ${age-MAX_VIZ} more — too many for your screen!)`;
+
+  const frag = document.createDocumentFragment();
+  for(let i=0;i<count;i++){
+    const item = document.createElement('div');
+    item.className='candle-item';
+    item.setAttribute('role','listitem');
+    item.setAttribute('aria-label',`Candle ${i+1}`);
+    item.innerHTML=`<div class="candle-flame"></div><div class="candle-body"></div><div class="candle-base"></div>`;
+    item.style.animationDelay=`${(i*0.02).toFixed(2)}s`;
+    item.addEventListener('click',()=>item.classList.toggle('lit'));
+    frag.appendChild(item);
+  }
+  candlesGrid.appendChild(frag);
+}
+
+function renderNumerals(age){
+  const digits = numeralBreakdown(age);
+  numeralDigits.innerHTML='';
+  numeralCount.textContent = digits.length;
+  const frag = document.createDocumentFragment();
+  digits.forEach((d,i)=>{
+    if(i>0){
+      const plus=document.createElement('span');
+      plus.className='plus-sign';plus.textContent='+';plus.setAttribute('aria-hidden','true');
+      frag.appendChild(plus);
+    }
+    const badge=document.createElement('div');
+    badge.className='digit-badge';
+    badge.style.animationDelay=`${i*0.1}s`;
+    badge.setAttribute('role','listitem');
+    badge.setAttribute('aria-label',`Digit ${d}`);
+    badge.textContent=d;
+    frag.appendChild(badge);
+  });
+  numeralDigits.appendChild(frag);
+  const dStr = digits.map(d=>`"${d}"`).join(' + ');
+  numeralDesc.textContent=`Age ${age} → ${dStr} = ${digits.length} numeral candle${digits.length!==1?'s':''} (one per digit)`;
+}
+
+const PARTICLE_COLORS=['#FF9D3E','#FFB84D','#FFC850','#FF6B35','#FFD700','#FF4500'];
+function burst(){
+  const wrap=$('particles');
+  wrap.innerHTML='';
+  for(let i=0;i<40;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    p.style.cssText=`left:${10+Math.random()*80}%;top:${Math.random()*30}%;`+
+      `background:${PARTICLE_COLORS[i%PARTICLE_COLORS.length]};`+
+      `width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;`+
+      `border-radius:${Math.random()>.5?'50%':'3px'};`+
+      `animation-duration:${1.2+Math.random()*1.8}s;`+
+      `animation-delay:${Math.random()*.5}s;`;
+    wrap.appendChild(p);
+  }
+  setTimeout(()=>wrap.innerHTML='',3500);
+}
+
+function shoppingText(age){
+  const digits=numeralBreakdown(age);
+  const counts={};
+  digits.forEach(d=>{counts[d]=(counts[d]||0)+1});
+  const parts=Object.entries(counts).map(([d,c])=>`${c}x[${d}]`).join(', ');
+  return `Birthday Candles for Age ${age}\nNumeral: ${parts}\nTaper: ${age} individual candles\nHappy shopping!`;
+}
+
+function applyAgeGradient(age){
+  if(document.body.hasAttribute('data-dark')) return;
+  const w=Math.min(age/100,1);
+  const g=Math.round(240-w*60), b=Math.round(230-w*100);
+  document.body.style.background=
+    `linear-gradient(135deg,rgb(255,${g},${b}) 0%,rgb(255,${g-15},${Math.max(b-40,100)}) 100%)`;
+}
+
+function checkMilestone(age){
+  if(MILESTONES[age]){
+    milestone.textContent='Milestone! '+MILESTONES[age];
+    milestone.style.display='block';
+  } else if(LUCKY[age]){
+    milestone.textContent='Lucky age! '+LUCKY[age];
+    milestone.style.display='block';
+  } else {
+    milestone.style.display='none';
+  }
+}
+
+function calculate(){
+  errorMsg.textContent='';
+  const res=parseInput(mainInput.value,isYearMode);
+  if(res.err){errorMsg.textContent=res.err;return;}
+  currentAge=res.age;
+  applyAgeGradient(currentAge);
+  ageNum.style.animation='none';
+  void ageNum.offsetWidth;
+  ageNum.style.animation='';
+  ageNum.textContent=currentAge;
+  bdayMsg.textContent=getMessage(currentAge);
+  taperCount.textContent=currentAge;
+  checkMilestone(currentAge);
+  renderNumerals(currentAge);
+  renderCandles(currentAge);
+  results.classList.add('show');
+  burst();
+  try{localStorage.setItem('bcf_last',JSON.stringify({age:currentAge,mode:isYearMode,val:mainInput.value}))}catch(e){}
+}
+
+mainInput.addEventListener('keydown',e=>{if(e.key==='Enter')calculate()});
+$('calcBtn').addEventListener('click',calculate);
+mainInput.addEventListener('input',()=>{
+  errorMsg.textContent='';
+  if(results.classList.contains('show')) calculate();
+});
+
+modeYear.addEventListener('click',()=>{
+  isYearMode=true;
+  modeYear.classList.add('active');modeYear.setAttribute('aria-pressed','true');
+  modeAge.classList.remove('active');modeAge.setAttribute('aria-pressed','false');
+  mainInput.placeholder='e.g. 1999';mainInput.min='1900';mainInput.max=currentYear();
+  mainInput.setAttribute('aria-label','Enter birth year');
+  inputHint.textContent='Enter birth year (e.g. 1999) or short year (e.g. 99)';
+  mainInput.value='';errorMsg.textContent='';
+});
+
+modeAge.addEventListener('click',()=>{
+  isYearMode=false;
+  modeAge.classList.add('active');modeAge.setAttribute('aria-pressed','true');
+  modeYear.classList.remove('active');modeYear.setAttribute('aria-pressed','false');
+  mainInput.placeholder='e.g. 42';mainInput.min='1';mainInput.max='150';
+  mainInput.setAttribute('aria-label','Enter age directly');
+  inputHint.textContent='Enter your exact age (1-150)';
+  mainInput.value='';errorMsg.textContent='';
+});
+
+darkBtn.addEventListener('click',()=>{
+  const body=document.body;
+  if(body.hasAttribute('data-dark')){
+    body.removeAttribute('data-dark');
+    darkBtn.textContent='🌙';
+    if(currentAge) applyAgeGradient(currentAge);
+  } else {
+    body.setAttribute('data-dark','');
+    body.style.background='';
+    darkBtn.textContent='☀️';
+  }
+});
+
+copyBtn.addEventListener('click',()=>{
+  if(!currentAge) return;
+  const text=shoppingText(currentAge);
+  const done=()=>{copyBtn.textContent='Copied!';copyBtn.classList.add('copied');
+    setTimeout(()=>{copyBtn.textContent='📋 Copy Shopping List';copyBtn.classList.remove('copied')},2000);};
+  navigator.clipboard?navigator.clipboard.writeText(text).then(done).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');
+    document.body.removeChild(ta);done();
+  }):done();
+});
+
+shareBtn.addEventListener('click',()=>{
+  if(!currentAge) return;
+  const text=`I need ${currentAge} candles for my birthday!\n${shoppingText(currentAge)}`;
+  if(navigator.share){
+    navigator.share({title:'Birthday Candles',text}).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(text).then(()=>{
+      shareBtn.textContent='Text Copied!';
+      setTimeout(()=>shareBtn.textContent='🎉 Share Birthday',2000);
+    });
+  }
+});
+
+try{
+  const last=JSON.parse(localStorage.getItem('bcf_last')||'null');
+  if(last&&last.age){
+    if(!last.mode) modeAge.click();
+    mainInput.value=last.val||last.age;
+    calculate();
+  }
+}catch(e){}
+
+})();
+</script>
+
+
+</body>
+</html>
