@@ -30,13 +30,6 @@
 - **WCAG AA accessible** — semantic HTML, ARIA labels, keyboard navigation, 4.5:1+ contrast
 - **< 25KB total** — single HTML file, no frameworks, no CDN calls
 
-## 📦 File Size
-
-| Asset | Size |
-|-------|------|
-| `index.html` (HTML + CSS + JS) | ~24.9 KB |
-| Total | **< 25 KB** ✅ |
-
 ## 🚀 Usage
 
 ```bash
